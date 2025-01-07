@@ -8,7 +8,7 @@ export default function Profile() {
   const [user, setUser] = React.useState(null);
 
   React.useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    supabase.auth.getUser().then(({ data: { user } }) => { // SELECT * FROM auth.users WHERE id = 'user_id'
       if (!user) {
         navigate('/login');
       } else {
