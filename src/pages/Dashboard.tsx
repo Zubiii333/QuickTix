@@ -18,14 +18,14 @@ export default function Dashboard() {
 
   async function loadProfile() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user } } = await supabase.auth.getUser(); // SELECT * FROM auth.users WHERE id = 'user_id'
       if (!user) return;
 
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('username')
-        .eq('id', user.id)
-        .single();
+      const { data, error } = await supabase 
+        .from('profiles')  // SELECT username, avatar_url FROM profiles
+        .select('username') // SELECT username, avatar_url FROM profiles
+        .eq('id', user.id) // WHERE id = 'user_id'
+        .single(); 
 
       if (error) throw error;
       setProfile(data);
@@ -36,16 +36,16 @@ export default function Dashboard() {
 
   async function loadTickets() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user } } = await supabase.auth.getUser(); 
       if (!user) return;
 
       const { data, error } = await supabase
-        .from('tickets')
-        .select(`
+        .from('tickets')  // SELECT * FROM tickets
+        .select(`  
           *,
-          event:events(*)
-        `)
-        .eq('user_email', user.email)
+          event:events(*) 
+        `) // SELECT *, events.* FROM tickets JOIN events ON tickets.event_id = events.id
+        .eq('user_email', user.email) // WHERE user_email = 'user_email'
         .order('created_at', { ascending: false });
 
       if (error) throw error;
