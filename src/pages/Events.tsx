@@ -18,10 +18,10 @@ export default function Events() {
   async function loadEvents() {
     try {
       let { data, error } = await supabase
-        .from('events')
-        .select('*')
-        .gte('date', new Date().toISOString()) // Only future events
-        .order('date', { ascending: true });
+        .from('events') // SELECT * FROM events
+        .select('*') // SELECT * FROM events
+        .gte('date', new Date().toISOString()) // WHERE date >= '2023-01-01T00:00:00.000Z'
+        .order('date', { ascending: true }); // ORDER BY date ASC
 
       if (error) throw error;
       setEvents(data || []);
@@ -33,7 +33,7 @@ export default function Events() {
   }
 
   const handleBookTicket = async (event: Event) => {
-    const { data: { session } } = await supabase.auth.getSession();
+    const { data: { session } } = await supabase.auth.getSession(); // SELECT * FROM auth.sessions WHERE id = 'session_id'
     if (!session) {
       navigate('/login');
       return;
@@ -43,31 +43,31 @@ export default function Events() {
 
   const handlePaymentComplete = async () => {
     if (!selectedEvent) return;
-  
+
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user } } = await supabase.auth.getUser(); // SELECT * FROM auth.users WHERE id = 'user_id'
       if (!user) throw new Error('No user found');
-  
+
       const ticketData = {
         event_id: selectedEvent.id,
         user_email: user.email,
         total_price: selectedEvent.price,
         payment_status: 'paid',
       };
-  
+
       const { error: ticketError } = await supabase
-        .from('tickets')
+        .from('tickets') // INSERT INTO tickets (event_id, user_email, total_price, payment_status) VALUES ('event_id', 'user_email', 'total_price', 'paid')
         .insert([ticketData]);
-  
+
       if (ticketError) throw ticketError;
-  
+
       const { error: eventError } = await supabase
-        .from('events')
+        .from('events') // UPDATE events SET available_tickets = available_tickets - 1 WHERE id = 'event_id'
         .update({ available_tickets: selectedEvent.available_tickets - 1 })
         .eq('id', selectedEvent.id);
-  
+
       if (eventError) throw eventError;
-  
+
       await loadEvents();
       navigate('/dashboard');
     } catch (error) {
